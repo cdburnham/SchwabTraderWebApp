@@ -2,7 +2,13 @@
 A containerized Python web application designed to run alongside a trader’s database, database management interface, and secrets vault. All services communicate securely over a private Docker network, making this project intended for personal, self-hosted use.
 
 To configure:
-In a terminal, from the project directory, run docker compose -up  *docker-compose.yml*
+1. Clone the repository: git clone https://github.com/cdburnham/SchwabTraderWebApp.git
+2. Copy the provided example env file (.env.example) as ".env" and configure your database username and password. Additionally, configure your database management interface's email address and password.
+3. Run the containers from the project directory using docker compose: docker compose up --build
+4. Access the application at these ports:
+- App: localhost:5000
+- pgAdmin: localhost:8080
+- Caddy: localhost
 
 This will ensure the containers for the following modules are properly configured for the app to run:
 - Database (PostgreSQL database)

@@ -1,0 +1,64 @@
+version: "3.9"
+
+services:
+  db:
+    image: timescale/timescaledb:latest-pg15
+    container_name: schwabtrader_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      ${DB_VOLUME}:/var/lib/postgresql/data
+    networks:
+      - schwabtrader-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: schwabtrader_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}E
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - schwabtrader-network
+
+    app:
+      build: .
+      container_name: schwabtrader_app
+      environment:
+        - FLASK_ENV=development
+        - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      ports:
+        "5000:5000"
+      depends_on:
+        - db
+      networks:
+        - schwabtrader-network
+
+    caddy:
+      image: caddy:latest
+      container_name: schwabtrader_caddy
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+        - ./Caddyfile:/etc/caddy/Caddyfile
+        - caddy_data:/data
+        - caddy_config:/config
+      depends_on:
+        - app
+      networks:
+        - schwabtrader-network
+
+    networks:
+      schwabtrader-network:
+        driver: bridge
+
+    volumes:
+      db_data:
+      caddy_data:
+      caddy_config:
